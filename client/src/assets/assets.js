@@ -1,6 +1,6 @@
 import dummy_profile from './dummy_profile.png'
 
-export const dummyResumeData = [
+export const dummyResumeData = [ 
     {
         // ----------------------------------------------------- Resume 1 ------------------------------------------------------
         personal_info: {

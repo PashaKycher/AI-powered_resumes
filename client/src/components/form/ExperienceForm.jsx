@@ -33,8 +33,8 @@ const ExperienceForm = ({ data, onChange }) => {
                     <p className='text-sm text-gray-500'>Add your job experience</p>
                 </div>
 
-                <button className='flex items-center gap-2 px-3 py-1 text-sm bg-purple-100 text-purple-700
-                rounded hover:bg-purple-200 transition-colors' onClick={addExperience}>
+                <button className='flex items-center gap-2 px-3 py-1 text-sm bg-green-100 text-green-700
+                rounded-lg hover:bg-green-200 transition-colors' onClick={addExperience}>
                     <Plus className='size-4' />
                     Add Experience
                 </button>
@@ -49,7 +49,7 @@ const ExperienceForm = ({ data, onChange }) => {
             ) : (
                 <div className='spacce-y-4'>
                     {data.map((experience, index) => (
-                        <div key={index} className='p-4 border border-gray-200 rounded-lg space-y-3'>
+                        <div key={index} className='p-4 border border-gray-200 rounded-lg space-y-3 mt-6'>
                             <div className='flex justify-between items-start'>
                                 <h4>Experience #{index + 1}</h4>
                                 <button onClick={() => removeExperience(index)} className='text-red-500
