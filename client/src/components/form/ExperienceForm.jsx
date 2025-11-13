@@ -1,7 +1,13 @@
-import { Briefcase, Plus, Sparkles, Trash } from 'lucide-react'
-import React from 'react'
+import { Briefcase, Loader2, Plus, Sparkles, Trash } from 'lucide-react'
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
+import api from '../../configs/api';
 
 const ExperienceForm = ({ data, onChange }) => {
+    const { token } = useSelector(state => state.auth);
+    const [geteratingIndex, setGeneratingIndex] = useState(-1);
+    const [isGenerating, setIsGenerating] = useState(false);
+
     const addExperience = () => {
         const newExperience = {
             company: '',
@@ -25,6 +31,24 @@ const ExperienceForm = ({ data, onChange }) => {
         updated[index] = { ...updated[index], [field]: value };
         onChange(updated);
     }
+
+    const generateDescription = async (index) => {
+        setGeneratingIndex(index)
+        const experience = data[index];
+        const prompt = `enhance my professional summary ${experience.description} for the position of ${experience.position} at ${experience.company}`
+        setIsGenerating(true);
+        try {
+            const { data } = await api.post('/api/ai/enhance-job-desc', { userContent: prompt }, { headers: { Authorization: token } })
+            console.log(data)
+            updatedExperience(index, "description", data.enhancedJobDesc)
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setGeneratingIndex(-1);
+            setIsGenerating(false);
+        }
+    }
+    
     return (
         <div className='space-y-6'>
             <div className='flex items-center justify-between'>
@@ -87,12 +111,18 @@ const ExperienceForm = ({ data, onChange }) => {
                                     <label className='text-sm font-medium text-gray-700'>Job Decription</label>
                                     <button className='flex items-center gap-1 px-2 py-1 text-xs bg-purple-100
                                     text-purple-700 rounded hover:bg-purple-200 transition-colors
-                                    disabled:opasiti-50'><Sparkles className='w-3 h-3' />Enhance with AI</button>
+                                    disabled:opasiti-50'
+                                    onClick={() => {generateDescription(index)}}
+                                    disabled={isGenerating || geteratingIndex == index || !experience.description 
+                                        || !experience.position || !experience.company}>
+                                        {isGenerating ? (<Loader2 className='size-4 animate-spin' />) : (<Sparkles className='size-4' />)}
+                                        {isGenerating ? "Generating..." : "AI Enhance"}
+                                    </button>
                                 </div>
 
                                 <textarea className='w-full text-sm px-3 py-2 rounded-lg resize-none' rows={4}
-                                value={experience.description || ""} placeholder='Describe your key responsibilities and achievements ...'
-                                onChange={(e) => updatedExperience(index, "description", e.target.value)} />
+                                    value={experience.description || ""} placeholder='Describe your key responsibilities and achievements ...'
+                                    onChange={(e) => updatedExperience(index, "description", e.target.value)} />
                             </div>
                         </div>
                     ))}

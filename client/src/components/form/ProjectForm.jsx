@@ -1,7 +1,13 @@
-import { GraduationCap, Plus, Sparkles, Trash } from 'lucide-react';
-import React from 'react'
+import { Loader2, Plus, Sparkles, Trash } from 'lucide-react';
+import React, { useState } from 'react'
+import { useSelector } from 'react-redux';
+import api from '../../configs/api';
 
 const ProjectForm = ({ data, onChange }) => {
+    const { token } = useSelector(state => state.auth);
+    const [geteratingIndex, setGeneratingIndex] = useState(-1);
+    const [isGenerating, setIsGenerating] = useState(false);
+
     const addProject = () => {
         const newProject = {
             name: '',
@@ -21,6 +27,24 @@ const ProjectForm = ({ data, onChange }) => {
         const updated = [...data];
         updated[index] = { ...updated[index], [field]: value };
         onChange(updated);
+    }
+
+    const generateDescription = async (index) => {
+        console.log("click")
+        setGeneratingIndex(index)
+        const project = data[index];
+        const prompt = `Describe my Project discription ${project.description} and name ${project.name} and type ${project.type}`
+        setIsGenerating(true);
+        try {
+            const { data } = await api.post('/api/ai/enhance-prod-desc', { userContent: prompt }, { headers: { Authorization: token } })
+            console.log(data)
+            updatedProject(index, "description", data.enhancedProdDesc)
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setGeneratingIndex(-1);
+            setIsGenerating(false);
+        }
     }
 
     return (
@@ -61,8 +85,13 @@ const ProjectForm = ({ data, onChange }) => {
                             <div className='flex items-center justify-between'>
                                 <label className='text-sm font-medium text-gray-700'>Project Decription</label>
                                 <button className='flex items-center gap-1 px-2 py-1 text-xs bg-purple-100
-                                    text-purple-700 rounded hover:bg-purple-200 transition-colors
-                                    disabled:opasiti-50'><Sparkles className='w-3 h-3' />Enhance with AI</button>
+                                text-purple-700 rounded hover:bg-purple-200 transition-colors
+                                disabled:opasiti-50'
+                                onClick={() => { generateDescription(index) }}
+                                disabled={isGenerating}>
+                                    {isGenerating ? (<Loader2 className='size-4 animate-spin' />) : (<Sparkles className='size-4' />)}
+                                    {isGenerating ? "Generating..." : "AI Enhance"}
+                                </button>
                             </div>
 
                             <textarea className='w-full text-sm px-3 py-2 rounded-lg resize-none' rows={4}
